@@ -1,0 +1,65 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+    id "com.github.node-gradle.node" version "2.2.3" 
+}
+node {
+    version = '16.14.0'
+	npmVersion = '8.3.1'
+    workDir= file("./frontend")
+    npmWorkDir= file("./frontend")
+    nodeModulesDir= file("./frontend")
+}
+
+group = 'com.nineview'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+	implementation 'commons-io:commons-io:2.11.0'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.21'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+task setUp(type: NpmTask){
+    description = "Install Node.js packages"
+    args = ['install']
+    inputs.files('package.json')
+    outputs.files('node_modules')
+}
+
+task buildFrontEnd(type: NpmTask, dependsOn: setUp){
+    description = "Build vue.js"
+    args = ['run', 'build']
+}
+
+processResources.dependsOn 'buildFrontEnd'
